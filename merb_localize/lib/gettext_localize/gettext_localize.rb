@@ -205,7 +205,7 @@ module GettextLocalize
   # sets the default application locale paths
   # being MERB_ROOT/locale
   def self.set_locale_paths
-    require 'gettext'
+    require 'gettext'       
     GetText::add_default_locale_path(self.get_locale_path)
   end
 
@@ -345,12 +345,12 @@ module GettextLocalize
   # tries to find a valid locale path
   # for a given path or Merb.root by default
   def self.get_locale_path(path=nil)               
-    path = Merb.root unless path
+    path = Merb.root unless path     
     if Pathname.new(path).relative?
       path = File.join(Merb.root, path, "locale")
     else
       path = File.join(Merb.root, "locale")
-    end
+    end           
     begin
       Pathname.new(path).realpath.to_s
     rescue
@@ -396,11 +396,11 @@ module GettextLocalize
 
   # sets the default textdomain
   # can be overriden in the controller   
-  # FIXME ActionController is not supported
   def self.set_default_textdomain(td)
     @@textdomain = td
-    GetText::textdomain(td)
-    ActionController::Base.send(:bindtextdomain, td)
+    Merb::Controller.send(:bindtextdomain, td)
+    GetText::textdomain(td)   
+    
   end
 
   # returns the current textdomain

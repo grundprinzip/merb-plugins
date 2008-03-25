@@ -45,7 +45,9 @@ module GettextLocalize
   # they are constants and aren't localized each time the constant
   # is read so if the locale changed in the meantime they aren't updated
   module TimeMethods
+                         
 
+    
     # overwrites strftime to localize options
     # that return strings
     # adds format %V - returns "of %B" localized, for example in catalan
@@ -109,7 +111,14 @@ module GettextLocalize
 end
 
 # now overwrite the date and time classes
-class Date
+class Date     
+             
+  # ported from Ror
+  DATE_FORMATS = {
+    :short => "%e %b",
+    :long  => "%B %e, %Y"
+  }
+  
   def not_localized_formats
     { :default => "%Y-%m-%d",
       :db => "%Y-%m-%d",
@@ -128,7 +137,16 @@ class Date
   alias :strftime :strftime_locale
 end
 
-class Time
+class Time   
+   
+  # Ported from Ror
+  DATE_FORMATS = {
+    :db     => "%Y-%m-%d %H:%M:%S",
+    :short  => "%d %b %H:%M",
+    :long   => "%B %d, %Y %H:%M",
+    :rfc822 => "%a, %d %b %Y %H:%M:%S %z"
+  }
+  
   def not_localized_formats
     { :default => "%a %b %d %H:%M:%S %Z %Y",
       :db => "%Y-%m-%d %H:%M:%S",

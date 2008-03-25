@@ -58,7 +58,8 @@ module GettextLocalize
     def set_default_gettext_locale(locale=nil,textdomain=nil,methods=nil)
       methods = GettextLocalize::methods if methods.nil?
       methods << :default
-      set_locale_by(*methods)
+      set_locale_by(*methods)                         
+      
       bind_default_textdomain(textdomain)
       init_default_gettext(textdomain)
     end

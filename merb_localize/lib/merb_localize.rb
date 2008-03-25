@@ -1,4 +1,4 @@
-if defined?(Merb::Plugins)  
+if defined?(Merb::Plugins) 
   
   # Ruby unicode support
   $KCODE = 'u'
@@ -26,7 +26,7 @@ if defined?(Merb::Plugins)
   require File.expand_path(File.dirname(__FILE__) /  'gettext_localize/gettext_localize_extend')
   require File.expand_path(File.dirname(__FILE__) /  'gettext_localize/gettext_localize_merb')
 
-  # set paths with LC_MESSAGES
+  # set paths with LC_MESSAGES    
   GettextLocalize::set_locale_paths
   
   # Register the extension to Merb::Controller
