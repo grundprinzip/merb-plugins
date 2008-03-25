@@ -196,11 +196,6 @@ module GettextLocalize
     return true if locale=='C' or locale.split("_")[0] == 'en' # default locale to translate
     mos = [File.join(self.get_locale_path,locale,"LC_MESSAGES",self.get_textdomain+".mo")]
     mos << File.join(self.get_locale_path,locale.split("_")[0],"LC_MESSAGES",self.get_textdomain+".mo")
-    self.each_plugin do |version,textdomain,path|
-      path = self.get_locale_path(path)
-      mos << File.join(path,locale,"LC_MESSAGES",textdomain+".mo")
-      mos << File.join(path,locale.split("_")[0],"LC_MESSAGES",textdomain+".mo")
-    end
     mos.each do |mo|
       return true if File.file?(mo) and File.readable?(mo)
     end
@@ -266,7 +261,7 @@ module GettextLocalize
                                
   # ==== Returns
   # String:: path of the locales.yml
-  def sef.get_locales_config           
+  def self.get_locales_config           
     self.get_file_path("locales.yml")
   end
      
@@ -435,7 +430,7 @@ module GettextLocalize
     elsif defined?(@@app_name)
       @@app_name.to_s
     else
-      Pathname.new(RAILS_ROOT).realpath.basename.to_s
+      Pathname.new(Merb.root).realpath.basename.to_s
     end
   end
 
