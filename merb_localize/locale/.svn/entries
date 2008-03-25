@@ -1,40 +1,0 @@
-8
-
-dir
-23
-svn://rubyforge.org/var/svn/gettextlocalize/trunk/gettext_localize/locale
-svn://rubyforge.org/var/svn/gettextlocalize
-
-
-
-2007-12-04T14:29:01.911106Z
-18
-rsalvado
-
-
-svn:special svn:externals svn:needs-lock
-
-
-
-
-
-
-
-
-
-
-
-88129e4d-5efd-448e-b01c-e6587c7f6439
-
-ca
-dir
-
-es
-dir
-
-fr
-dir
-
-de
-dir
-
