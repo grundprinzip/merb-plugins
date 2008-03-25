@@ -2,12 +2,11 @@ require File.dirname(__FILE__) + '/test_helper'
 
 class RenderController < Merb::Controller
   
-  def test() render :inline => <<-EOF
-  locale: <%=GettextLocalize.locale%>
-  country: <%=GettextLocalize.country%>
-  currency: <%=number_to_currency(1000.5)%>
-  string: <%=_("January")%>
-  EOF
+  self._template_root = File.dirname(__FILE__) / "views"           
+  
+  def test()
+    render
+
   end               
   
   def rescue_action(e) raise; end
@@ -40,7 +39,7 @@ class RenderControllerTest < Test::Unit::TestCase
     set_controller RenderController
     GettextLocalize.set_locale(nil)
     GettextLocalize.set_country(nil)
-    set_cookie("l",nil)
+    #set_cookie("l",nil)
   end
 
   def assert_view_in_cat
@@ -50,7 +49,7 @@ country: es
 currency: 1.000,50 €
 string: Gener
 EOF
-    assert_equal expect,@response.body
+    assert_equal expect,@controller.body
   end
 
   def assert_view_in_spa
@@ -60,7 +59,7 @@ country: es
 currency: 1.000,50 €
 string: Enero
 EOF
-    assert_equal expect,@response.body
+    assert_equal expect,@controller.body
   end
 
   def assert_view_in_usa
@@ -70,89 +69,102 @@ country: us
 currency: $1,000.50
 string: January
 EOF
-    assert_equal expect,@response.body
+    assert_equal expect,@controller.body
   end
 
   def test_should_read_locale
     set_controller RenderController
-    #get :test
-    #GettextLocalize.set_locale("en_US")
-    assert_equal "en_US", GettextLocalize.locale
-    #GettextLocalize.set_locale("ca-es")
+    GettextLocalize.set_locale("en_US")
+    assert_equal "en_US", GettextLocalize.locale     
+    @controller._dispatch("test")
+    GettextLocalize.set_locale("ca-es")
     assert_equal "ca_ES", GettextLocalize.locale
   end
 
   def test_controller_should_set_defaults
     set_controller RenderController
-    GettextLocalize.default_locale = "ca-es"
-    get :test
+    GettextLocalize.default_locale = "ca-es"     
+    @controller._dispatch("test")
     assert_view_in_cat
-    GettextLocalize.default_locale = "en-us"
-    get :test
+    GettextLocalize.default_locale = "en-us"    
+    
+    @controller._dispatch("test")
     assert_view_in_usa
   end
 
   def test_controler_should_overwrite_defaults
     set_controller RenderControllerBeforeDefaultLocale
     GettextLocalize.default_locale = "ca-es"
-    get :test
+    @controller._dispatch("test")
     assert_view_in_usa
 
     set_controller RenderControllerBeforeDefaultCountry
     GettextLocalize.default_locale = "ca"
-    get :test
+    @controller._dispatch("test")
     assert_view_in_cat
   end
 
   def test_controller_should_set_locale_by_everything
     set_controller RenderControllerByEverything
     GettextLocalize.default_locale = "ca-es"
-    get :test
-    assert_view_in_cat
-    @request.env['HTTP_ACCEPT_LANGUAGE'] = 'en-us'
-    get :test
+    #@controller._dispatch("test")
+    #assert_view_in_cat             
+    
+    @controller.request.env['HTTP_ACCEPT_LANGUAGE'] = 'en-us'
+    @controller._dispatch("test")
+    assert_view_in_usa     
+              
+    @controller.session['l'] = 'ca-es'
+    @controller._dispatch("test")
+    assert_view_in_cat           
+    
+    @controller.cookies[:l] = 'en-us'
+    @controller._dispatch("test")
     assert_view_in_usa
-    session['l'] = 'ca-es'
-    get :test
-    assert_view_in_cat
-    set_cookie('l','en-us')
-    get :test
-    assert_view_in_usa
-    get :test, { "l" => "ca-es" }
+      
+    @controller.params["l"] = "ca-es"
+    @controller._dispatch("test")
     assert_view_in_cat
   end
 
   def test_controller_should_set_locale_by_header
-    set_controller RenderControllerByEverything
+    set_controller RenderControllerByEverything   
+    @controller.request.env['HTTP_ACCEPT_LANGUAGE'] = ""
     GettextLocalize.default_locale = "ca-es"
-    get :test
+    @controller._dispatch("test")
     assert_view_in_cat
-    @request.env['HTTP_ACCEPT_LANGUAGE'] = 'en-us'
-    get :test
+    
+    @controller.request.env['HTTP_ACCEPT_LANGUAGE'] = 'en-us'
+    @controller._dispatch("test")
     assert_view_in_usa
-    @request.env['HTTP_ACCEPT_LANGUAGE'] = 'es-es,es;q=0.8,en-us;q=0.5,en;q=0.3'
-    get :test
+    @controller.request.env['HTTP_ACCEPT_LANGUAGE'] = 'es-es,es;q=0.8,en-us;q=0.5,en;q=0.3'
+    @controller._dispatch("test")
     assert_view_in_spa
-    @request.env['HTTP_ACCEPT_LANGUAGE'] = 'lo-la,li;q=0.8,en-us;q=0.5,en;q=0.3'
-    get :test
+    @controller.request.env['HTTP_ACCEPT_LANGUAGE'] = 'lo-la,li;q=0.8,en-us;q=0.5,en;q=0.3'
+    @controller._dispatch("test")
     assert_view_in_usa
-    @request.env['HTTP_ACCEPT_LANGUAGE'] = 'la-lo,lu,es-es'
-    get :test
+    @controller.request.env['HTTP_ACCEPT_LANGUAGE'] = 'la-lo,lu,es-es'
+    @controller._dispatch("test")
     assert_view_in_spa
   end
 
   def test_controller_should_not_memorize_locale_by_param
-    set_controller RenderControllerByEverything
+    set_controller RenderControllerByEverything    
+    @controller.request.env['HTTP_ACCEPT_LANGUAGE'] = ""
     GettextLocalize.default_locale = "ca-es"
-    get :test
+    @controller._dispatch("test")
     assert_view_in_cat
-    get :test, { "l"=>"en-us" }
-    assert_view_in_usa
-    post :test
+    @controller.params["l"] = "en-us"
+    @controller._dispatch("test")
+    assert_view_in_usa      
+    @controller.params.delete("l")
+    @controller._dispatch("test")
     assert_view_in_cat
-    post :test, { "l"=>"es" }
-    assert_view_in_spa
-    get :test
+    @controller.params["l"] = "es"
+    @controller._dispatch("test")
+    assert_view_in_spa            
+    @controller.params.delete("l")
+    @controller._dispatch("test")
     assert_view_in_cat
   end
 

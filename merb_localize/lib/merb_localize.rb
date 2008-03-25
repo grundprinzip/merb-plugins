@@ -1,4 +1,16 @@
 if defined?(Merb::Plugins) 
+                           
+  # check for helper enabled
+  config = Merb::Plugins.config[:merb_localize]   
+  if config && config[:exclude_helper]
+    EXCLUDE_HELPERS = true     
+    
+    # add the dependency for merb_helpers
+    dependency "merb_helpers"
+    
+  else            
+    EXCLUDE_HELPERS = false
+  end
   
   # Ruby unicode support
   $KCODE = 'u'
@@ -34,7 +46,7 @@ if defined?(Merb::Plugins)
                           
   # Register the default before filter for a merb controller
   class Merb::Controller
-    before Proc.new {|c| 
+    before Proc.new {|c|    
       c.set_default_gettext_locale
     }
   end

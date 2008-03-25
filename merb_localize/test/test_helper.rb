@@ -13,10 +13,13 @@ $:.push File.join(File.dirname(__FILE__), '..', 'lib')
 
 require 'merb_localize'                            
     
-# Set the textdomain                  
-GetText::bindtextdomain("gettext_localize",:path=>GettextLocalize::get_locale_path)                  
+# Set the textdomain     
+GettextLocalize.set_default_textdomain("gettext_localize")
+
 
 class Test::Unit::TestCase           
   include Merb::Test::Helpers
   include Merb::Test::RequestHelper
-end
+end         
+
+Merb.start :environment => "test", :session_store => "memory"

@@ -156,7 +156,7 @@ module GettextLocalize
   # sets the locale
   # if locale is nil unsets
   def self.set_locale(locale)
-    @@locale = self.format_locale(locale)
+    @@locale = self.format_locale(locale) 
     GetText::set_locale(@@locale)
   end
 
@@ -191,8 +191,8 @@ module GettextLocalize
   # tries to check if the locale
   # is translated, by checking the load_paths
   # FIXME: check if Gettext has this
-  def self.has_locale?(locale)
-    locale = self.format_locale(locale)
+  def self.has_locale?(locale)               
+    locale = self.format_locale(locale)   
     return true if locale=='C' or locale.split("_")[0] == 'en' # default locale to translate
     mos = [File.join(self.get_locale_path,locale,"LC_MESSAGES",self.get_textdomain+".mo")]
     mos << File.join(self.get_locale_path,locale.split("_")[0],"LC_MESSAGES",self.get_textdomain+".mo")
@@ -230,9 +230,9 @@ module GettextLocalize
         countries_yml_file = Pathname.new(self.get_countries_path).realpath.to_s
         
         countries = YAML::load(File.open(countries_yml_file))
-        countries = self.string_to_sym(countries)
-        if countries.has_key?(country.to_sym)
-          @@country_options = countries[country.to_sym]
+        #countries = self.string_to_sym(countries)
+        if countries.has_key?(country)#.to_sym)
+          @@country_options = countries[country]#.to_sym]
           @@country_options_country = country
           return true
         elsif @@country_options.nil?
@@ -386,7 +386,7 @@ module GettextLocalize
   end
 
   # returns the current locale
-  def self.get_locale
+  def self.get_locale 
     [@@locale,@@default_locale,ENV['LANG'],@@fallback_locale].each do |locale|
       locale = self.format_locale(locale)
       return locale if locale
@@ -400,7 +400,6 @@ module GettextLocalize
     @@textdomain = td
     Merb::Controller.send(:bindtextdomain, td)
     GetText::textdomain(td)   
-    
   end
 
   # returns the current textdomain

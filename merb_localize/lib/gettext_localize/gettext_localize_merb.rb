@@ -17,7 +17,7 @@ module GettextLocalize
     # loads default locale in every controller
     # can be overriden by calling set_locale
     def set_default_locale(locale=nil)
-      locale = GettextLocalize::locale if (locale.nil? || locale == 'en-us') # FIXME Hack for Rails 2.0
+      locale = GettextLocalize::locale if locale.nil?
       unless locale.nil?
         GettextLocalize::set_locale(locale)
         true
@@ -75,7 +75,7 @@ module GettextLocalize
         params = methods[1..-1]
         methods = methods.first
       end
-      methods << :default
+      methods << :default   
       methods.each do |method|
         func = "set_locale_by_#{method}".to_sym
         if respond_to?(func)
@@ -91,13 +91,14 @@ module GettextLocalize
     # <tt>HTTP_ACCEPT_LANGUAGE = es-es,es;q=0.8,en-us;q=0.5,en;q=0.3</tt>
     # add to your controller:
     # <tt>before_filter :set_locale_by_header</tt>
-    def set_locale_by_header(name='lang')
+    def set_locale_by_header(name='lang')         
       name = 'HTTP_ACCEPT_LANGUAGE'
       GettextLocalize::set_locale(nil)
-      locales = self.get_locales_from_hash(request.env,name)
-      return unless locales
+      locales = self.get_locales_from_hash(request.env,name)     
+      return if locales.nil?
+      
       locales.each do |locale|
-        if GettextLocalize.has_locale?(locale)
+        if GettextLocalize.has_locale?(locale)     
           return set_default_locale(locale)
         end
       end
@@ -131,9 +132,9 @@ module GettextLocalize
     # remember this only saves the session lang if
     # use session is activated
     def set_locale_by_session(name='lang')
-      GettextLocalize::set_locale(nil)
+      GettextLocalize::set_locale(nil)         
       locales = self.get_locales_from_hash(session,name)
-      return unless locales
+      return unless locales        
       locales.each do |locale|
         # has_locale? checks if locale file exists
         # FIXME: could return false if locale file
@@ -153,7 +154,7 @@ module GettextLocalize
     # <tt>before_filter :set_locale_by_param</tt>
     def set_locale_by_param(name='lang')
       GettextLocalize::set_locale(nil)
-      locales = self.get_locales_from_hash(params,name)
+      locales = self.get_locales_from_hash(params,name)      
       return unless locales
       locales.each do |locale|
         if GettextLocalize.has_locale?(locale)
@@ -164,7 +165,8 @@ module GettextLocalize
 
     # sets the default locale
     # used to define <tt>set_locale_by :param, :default</tt>
-    def set_locale_by_default(name='lang')
+    def set_locale_by_default(name='lang')  
+      GettextLocalize::set_locale(nil) 
       set_default_locale
     end
 
@@ -173,7 +175,10 @@ module GettextLocalize
     # reads a locales parameter from a hash
     # accepts header format with priorities (see set_locale_by_header)
     # and a list of locales separated by commas
-    def get_locales_from_hash(hash,name='lang')
+    def get_locales_from_hash(hash,name='lang')         
+
+      return if hash.nil?
+      
       name = name.to_sym if hash[name.to_sym]
       name = name.to_s if hash[name].respond_to?(:empty?) and hash[name].empty?
       return unless hash[name]
@@ -194,6 +199,67 @@ module GettextLocalize
       end
       return locales
     end
+  end
+     
+  module Helpers
+    
+    # NumberHelper extensions
+    module NumberHelper
+      
+      # modify number_to_currency to load currency options specified on
+      # country.yml file.
+      def number_to_currency(number, options = {})
+        country_options = GettextLocalize::country_options  
+        
+        options = country_options["currency"].merge(options)
+        options["order"] ||= ["unit", "number"]
+        
+        precision, unit, separator, delimiter = options.delete("precision") { 2 }, options.delete("unit") { "$" }, options.delete("separator") { "." }, options.delete("delimiter") { "," }
+        separator = "" unless precision > 0
+
+        unit = " " + unit if options["order"] == ["number", "unit"]
+        output = ''
+        begin
+          options["order"].each do |param|
+            case param.to_s
+              when "unit"
+                output << unit
+              when "number"
+                parts = number_with_precision(number, precision).split('.')
+                output << number_with_delimiter(parts[0], delimiter) + separator + parts[1].to_s
+            end
+          end
+        rescue
+          output = number
+        end
+        output
+      end
+    
+      def number_with_delimiter(number, delimiter=",", separator=".")
+        begin
+          parts = number.to_s.split('.')
+          parts[0].gsub!(/(\d)(?=(\d\d\d)+(?!\d))/, "\\1#{delimiter}")
+          parts.join separator
+        rescue
+          number
+        end
+      end                                                            
+       
+      def number_with_precision(number, precision=3)
+       "%01.#{precision}f" % number
+      rescue
+        number
+      end     
+      
+    end
+    
+  end
+end    
+
+unless EXCLUDE_HELPERS
+  
+  class Merb::Controller #:nodoc:
+    include GettextLocalize::Helpers::NumberHelper
   end
   
 end
