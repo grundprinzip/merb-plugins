@@ -18,10 +18,6 @@ if defined?(Merb::Plugins)
   # country if everything else fails
   GettextLocalize::fallback_country = 'es'
 
-  # add this plugin as a new textdomain
-  # add this line to every localized plugin
-  #GettextLocalize::plugin_bindtextdomain
-
   # initialize country options from YML file
   GettextLocalize::set_country_options
 
@@ -29,7 +25,7 @@ if defined?(Merb::Plugins)
   require 'gettext_localize/gettext_localize_extend'
 
   # set paths with LC_MESSAGES
-  GettextLocalize::set_locale_paths
+  #GettextLocalize::set_locale_paths
 
   
   Merb::Plugins.add_rakefiles(File.join(File.dirname(__FILE__) / "tasks" / "gettext_tasks" ))

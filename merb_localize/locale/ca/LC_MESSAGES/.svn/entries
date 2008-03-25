@@ -1,0 +1,41 @@
+8
+
+dir
+23
+svn://rubyforge.org/var/svn/gettextlocalize/trunk/gettext_localize/locale/ca/LC_MESSAGES
+svn://rubyforge.org/var/svn/gettextlocalize
+
+
+
+2007-11-29T11:14:52.442595Z
+16
+rsalvado
+
+
+svn:special svn:externals svn:needs-lock
+
+
+
+
+
+
+
+
+
+
+
+88129e4d-5efd-448e-b01c-e6587c7f6439
+
+gettext_localize.mo
+file
+
+
+
+
+2008-03-24T23:25:52.000000Z
+8e9686476b569a24dc60a80c47cea05b
+2007-11-29T11:14:52.442595Z
+16
+rsalvado
+has-props
+

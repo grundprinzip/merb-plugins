@@ -208,17 +208,10 @@ module GettextLocalize
   end
 
   # sets the default application locale paths
-  # being RAILS_ROOT/locale and
-  # RAILS_ROOT/vendor/plugins/$plugin/locale
-  # in case the plugin has a locale dir
+  # being MERB_ROOT/locale
   def self.set_locale_paths
     require 'gettext'
     GetText::add_default_locale_path(self.get_locale_path)
-    #self.each_plugin do |version,name,dir|
-    #  if File.directory?(dir) and File.readable?(dir)
-    #    GetText::add_default_locale_path(self.get_locale_path(dir))
-    #  end
-    end
   end
 
   # adds a default locale path
@@ -237,8 +230,10 @@ module GettextLocalize
   def self.set_country_options(country=nil)
     begin
       country = self.get_country if country.nil?
-      if country != @@country_options_country or !@@country_options
-        countries_yml_file = Pathname.new(File.join(self.get_plugin_dir(),"countries.yml")).realpath.to_s
+      if country != @@country_options_country or !@@country_options    
+        
+        countries_yml_file = Pathname.new(self.get_countries_path).realpath.to_s
+        
         countries = YAML::load(File.open(countries_yml_file))
         countries = self.string_to_sym(countries)
         if countries.has_key?(country.to_sym)
@@ -261,44 +256,41 @@ module GettextLocalize
     self.set_country_options
     @@country_options
   end
-
-  # sets the plugin textdomain and forces the creation
-  # of a RAILS_ROOT/vendor/plugins/$plugin/po/$textdomain.pot
-  # when executing rake gettext:plugins:updatepo
-  def self.plugin_bindtextdomain(name=nil,version="1.0.0")
-    name = self.get_plugin_dir_name if name.nil?
-    self.add_plugin(name,version)
-    GetText::bindtextdomain(name, :path => self.get_plugin_locale_path)
+    
+  # Calculate the path to the countries.yml
+  # ==== Returns
+  # String:: the path to the countries.yml
+  def self.get_countries_path
+    self.get_file_path("countries.yml")
+  end           
+                               
+  # ==== Returns
+  # String:: path of the locales.yml
+  def sef.get_locales_config           
+    self.get_file_path("locales.yml")
   end
-
-  # iterates over every application plugin that has
-  # gettext localization yielding the variables
-  # version, name and plugin directory
-  def self.each_plugin
-    Dir.glob(File.join(self.get_plugins_base_dir,"*")).each do |file|
-      begin
-        po_dir = Pathname.new(File.join(file,"po")).realpath.to_s
-      rescue
-        next
-      end
-      if File.directory?(po_dir) and File.writable?(po_dir)
-        if defined?(@@plugins) and @@plugins[file]
-          version = @@plugins[file][:version]
-          name = @@plugins[file][:name]
-        else
-          version = "1.0.0",
-          name = File.basename(file)
-        end
-        yield version, name, file
-      end
+     
+  # Returns the path to a file based on the given 
+  # filename. The lookup is done first in the config
+  # dir and afterwards in the plugin directory 
+  # ==== Parameters
+  # String:: the filename
+  # ==== Returns
+  # String:: path for the given filename
+  def self.get_file_path(filename)            
+    if File.file?(Merb.root / "config" / filename)
+      Merb.root / "config" / "countries.yml"
+    else
+      File.expand_path(File.dirname(__FILE__) / ".." / ".." / filename)
     end
   end
 
+  
   # returns a hash with the supported locales
   # in the aplication as keys and the localized
   # names of the locales as values
-  def self.supported_locales
-    locale_dir = File.join(RAILS_ROOT,"locale","**")
+  def self.supported_locales            
+    locale_dir = File.join(Merb.root,"locale","**")
     locales = Dir.glob(locale_dir).select { |file| File.directory? file }.collect { |dir| File.basename(dir) }
     locales.collect!{|l| self.format_locale l }
     locales.each{|l| locales << l[0..1] if l.length > 2 }
@@ -310,8 +302,8 @@ module GettextLocalize
 
   # returns all locale names, each in it's own language
   # please check the file <code>locales.yml</code> and add your own
-  def self.all_locales
-    locales_yml_file = Pathname.new(File.join(self.get_plugin_dir(),"locales.yml")).realpath.to_s
+  def self.all_locales                 
+    locales_yml_file = Pathname.new(self.get_locales_config).realpath.to_s
     locales = YAML::load(File.open(locales_yml_file))
     self.string_to_sym(locales)
   end
@@ -356,13 +348,13 @@ module GettextLocalize
   end
 
   # tries to find a valid locale path
-  # for a given path or RAILS_ROOT by default
-  def self.get_locale_path(path=nil)
-    path = RAILS_ROOT unless path
+  # for a given path or Merb.root by default
+  def self.get_locale_path(path=nil)               
+    path = Merb.root unless path
     if Pathname.new(path).relative?
-      path = File.join(RAILS_ROOT, path, "locale")
+      path = File.join(Merb.root, path, "locale")
     else
-      path = File.join(path, "locale")
+      path = File.join(Merb.root, "locale")
     end
     begin
       Pathname.new(path).realpath.to_s
@@ -408,7 +400,8 @@ module GettextLocalize
   end
 
   # sets the default textdomain
-  # can be overriden in the controller
+  # can be overriden in the controller   
+  # FIXME ActionController is not supported
   def self.set_default_textdomain(td)
     @@textdomain = td
     GetText::textdomain(td)
@@ -500,45 +493,45 @@ module GettextLocalize
   end
 
   # returns the current app plugin dir
-  def self.get_plugins_base_dir
-    Pathname.new(File.join(RAILS_ROOT,"vendor","plugins")).realpath.to_s
-  end
+  # def self.get_plugins_base_dir
+  #     Pathname.new(File.join(RAILS_ROOT,"vendor","plugins")).realpath.to_s
+  #   end
 
   # returns the name of a plugin dir
   # RAILS_ROOT/vendor/plugins/gettext_localize -> gettext_localize
   # if no directory is passed it uses the current file dirname
-  def self.get_plugin_dir_name(dir=nil)
-    dir = File.dirname(__FILE__) if dir.nil?
-    dir = Pathname.new(dir).realpath.to_s
-    plugins_dir = self.get_plugins_base_dir
-    if dir.starts_with?(plugins_dir)
-      dir.gsub(plugins_dir,"").split("/")[1]
-    end
-  end
-
-  # returns the complete absolute dir of a plugin
-  def self.get_plugin_dir(dir=nil)
-    name = self.get_plugin_dir_name(dir)
-    if name
-      Pathname.new(File.join(RAILS_ROOT,"vendor","plugins",name)).realpath.to_s
-    end
-  end
-
-  # returns a plugin locale path
-  def self.get_plugin_locale_path(dir=nil)
-    self.get_locale_path(self.get_plugin_dir(dir))
-  end
+  # def self.get_plugin_dir_name(dir=nil)
+  #     dir = File.dirname(__FILE__) if dir.nil?
+  #     dir = Pathname.new(dir).realpath.to_s
+  #     plugins_dir = self.get_plugins_base_dir
+  #     if dir.starts_with?(plugins_dir)
+  #       dir.gsub(plugins_dir,"").split("/")[1]
+  #     end
+  #   end
+  # 
+  #   # returns the complete absolute dir of a plugin
+  #   def self.get_plugin_dir(dir=nil)
+  #     name = self.get_plugin_dir_name(dir)
+  #     if name
+  #       Pathname.new(File.join(RAILS_ROOT,"vendor","plugins",name)).realpath.to_s
+  #     end
+  #   end
+  # 
+  #   # returns a plugin locale path
+  #   def self.get_plugin_locale_path(dir=nil)
+  #     self.get_locale_path(self.get_plugin_dir(dir))
+  #   end
 
   # adds a plugin to the localized plugins list
   # a plugin is considered localized if added
   # to this list using plugin_bindtextdomain
   # or if it has a po/ directory
-  def self.add_plugin(name,version="1.0.0",dir=nil)
-    dir = self.get_plugin_dir if dir.nil?
-    @@plugins[dir] ||= {:name=>nil,:version=>nil }
-    @@plugins[dir][:name] = name
-    @@plugins[dir][:version] = version
-  end
+  # def self.add_plugin(name,version="1.0.0",dir=nil)
+  #     dir = self.get_plugin_dir if dir.nil?
+  #     @@plugins[dir] ||= {:name=>nil,:version=>nil }
+  #     @@plugins[dir][:name] = name
+  #     @@plugins[dir][:version] = version
+  #   end
 
   # converts string keys of a hash into symbol keys.
   def self.string_to_sym(h)
