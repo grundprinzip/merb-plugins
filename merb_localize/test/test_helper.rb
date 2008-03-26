@@ -20,6 +20,7 @@ GettextLocalize.set_default_textdomain("gettext_localize")
 class Test::Unit::TestCase           
   include Merb::Test::Helpers
   include Merb::Test::RequestHelper
+  include Merb::Test::RouteHelper
 end         
 
 Merb.start :environment => "test", :session_store => "memory"

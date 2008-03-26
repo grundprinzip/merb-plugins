@@ -171,13 +171,15 @@ EOF
   def test_controller_should_not_memorize_locale_by_session
     set_controller RenderControllerByEverything
     GettextLocalize.default_locale = "ca-es"
-    get :test
+    get "render_controller_by_everything/test" do
+      puts body
+    end
     assert_view_in_cat
     session["l"] = "en-us"
-    get :test
+    get "render_controller_by_everything/test"
     assert_view_in_usa
     session["l"] = ""
-    get :test
+    get "render_controller_by_everything/test"
     assert_view_in_cat
   end
 
