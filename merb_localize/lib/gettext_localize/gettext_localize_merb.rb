@@ -17,7 +17,7 @@ module GettextLocalize
     # loads default locale in every controller
     # can be overriden by calling set_locale
     def set_default_locale(locale=nil)
-      locale = GettextLocalize::locale if locale.nil?
+      locale = GettextLocalize::locale if locale.nil? 
       unless locale.nil?
         GettextLocalize::set_locale(locale)
         true
@@ -75,10 +75,10 @@ module GettextLocalize
         params = methods[1..-1]
         methods = methods.first
       end
-      methods << :default   
+      methods << :default                      
       methods.each do |method|
         func = "set_locale_by_#{method}".to_sym
-        if respond_to?(func)
+        if respond_to?(func)        
           return true if self.send(func,*params) == true
         end
       end
@@ -165,7 +165,7 @@ module GettextLocalize
 
     # sets the default locale
     # used to define <tt>set_locale_by :param, :default</tt>
-    def set_locale_by_default(name='lang')  
+    def set_locale_by_default(name='lang')   
       GettextLocalize::set_locale(nil) 
       set_default_locale
     end
