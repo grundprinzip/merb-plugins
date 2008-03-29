@@ -5,7 +5,7 @@ require 'spec/rake/spectask'
 
 PLUGIN = "merb_localize"
 NAME = "merb_localize"
-VERSION = "0.0.1"
+VERSION = "0.1.1"
 AUTHOR = "Martin Grund"
 EMAIL = "grundprinzip@gmail.com"
 HOMEPAGE = "http://merb.rubyforge.org/"
@@ -32,7 +32,9 @@ spec = Gem::Specification.new do |s|
   s.files = %w(LICENSE README Rakefile TODO countries.yml locales.yml) + 
     Dir.glob("{lib,specs,locale}/**/*")
 end
-
+                             
+# add gettext as dependency
+spec.add_dependency("gettext")
 
 Rake::GemPackageTask.new(spec) do |pkg|
   pkg.gem_spec = spec
