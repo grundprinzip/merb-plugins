@@ -12,6 +12,9 @@ describe RenderController do
       r.default_routes
     end
   end
+              
+  
+  it "should preserve the content-type set but modify the charset"
 
   it "should read the default locale" do
     GettextLocalize.set_locale("en_US")

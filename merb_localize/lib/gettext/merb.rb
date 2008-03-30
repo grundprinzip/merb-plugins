@@ -64,6 +64,11 @@ module GetText
     # This function returns an reversed array of the locale strings under RAILS_ROOT/locale/*.
     # It is used for restriction such as caching files.
     def available_locales
+      # TODO add test                        
+      puts "*" * 80        
+      
+      p @@available_locales
+      p GetText.cached?
       unless (GetText.cached? and @@available_locales)
         @@available_locales = (Dir.glob(File.join(Merb.root, "locale/[a-z]*")).map{|path| File.basename(path)} << "en").uniq.sort.reverse
       end
@@ -72,7 +77,8 @@ module GetText
 
     # Returns a normalized locale which is in available_locales.
     # * locale: a Locale::Object or nil.
-    def normalized_locale(locale = nil)
+    def normalized_locale(locale = nil)     
+      # TODO add test
       locale ||= GetText.locale
       (available_locales &
         [locale.to_general, locale.to_s, locale.language, Locale.default.language, "en"].uniq)[0]
@@ -99,7 +105,8 @@ module Merb #:nodoc:
       set_locale_all(nil)
     end
 
-    def init_content_type #:nodoc:
+    def init_content_type #:nodoc:    
+      # TODO add test
       if headers["Content-Type"] and /javascript/ =~ headers["Content-Type"]
         headers["Content-Type"] = "text/javascript; charset=#{GetText.output_charset}"
       elsif ! headers["Content-Type"]
@@ -107,7 +114,8 @@ module Merb #:nodoc:
       end
     end
 
-    def call_methods_around_init_gettext(ary)  #:nodoc:
+    def call_methods_around_init_gettext(ary)  #:nodoc:  
+      # TODO add test
       ary.each do |block|
         if block.kind_of? Symbol
           send(block)
@@ -119,7 +127,8 @@ module Merb #:nodoc:
 
     def init_gettext # :nodoc:
       cgi = nil          
-                               
+      
+      # TODO add test or needed anyhow                         
       if defined? request.cgi
         cgi = request.send(:cgi)
       end       
@@ -150,7 +159,8 @@ module Merb #:nodoc:
     #     # ...
     #   end
     @@before_init_gettext = []
-    def self.before_init_gettext(*methods, &block)
+    def self.before_init_gettext(*methods, &block)  
+      # TODO add test
       @@before_init_gettext += methods
       @@before_init_gettext << block if block_given? 
     end
@@ -169,7 +179,8 @@ module Merb #:nodoc:
     #     # ...
     #   end
     @@after_init_gettext = []
-    def self.after_init_gettext(*methods, &block)
+    def self.after_init_gettext(*methods, &block)   
+      # TODO add test
       @@after_init_gettext += methods
       @@after_init_gettext << block if block_given? 
     end
@@ -201,7 +212,8 @@ module Merb #:nodoc:
     def self.init_gettext(domainname, options = {}, content_type = "text/html")
       opt = {:charset => "UTF-8", :content_type => content_type}
       if options.kind_of? String
-        # For backward compatibility
+        # For backward compatibility       
+        # TODO add test
         opt.merge!(:charset => options, :content_type => content_type)
       else
         opt.merge!(options)
@@ -237,7 +249,8 @@ module Merb #:nodoc:
     # with init_gettext. *(Since 1.8)*
     # 
     # * Returns: [[textdomainname1, path1], [textdomainname2, path2], ...]
-    def self.textdomains
+    def self.textdomains        
+      # TODO add test
       @@gettext_domainnames
     end
   end
@@ -249,7 +262,8 @@ module Merb::Template #:nodoc:
     alias template_for_without_locale template_for #:nodoc:
     # This provides to find localized template files such as foo_ja.rhtml, foo_ja_JP.rhtml
     # instead of foo.rhtml. If the file isn't found, foo.rhtml is used.
-    def render_file(path, template_stack = [])
+    def render_file(path, template_stack = [])      
+      # TODO add test
       locale = GetText.locale
       [locale.to_general, locale.to_s, locale.language, Locale.default.language].uniq.each do |v|
         localized_path = "#{template_path}_#{v}"

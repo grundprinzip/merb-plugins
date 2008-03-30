@@ -14,7 +14,23 @@ describe GettextLocalize do
     Merb::Router.prepare do |r|
       r.default_routes
     end
+  end    
+  
+  it "should list all available locales" do
+    GetText::Merb.available_locales.should_not be_nil
+    
+    GetText::Merb.send(:class_variable_set, :@@available_locales, nil)
+    GetText::Merb.available_locales.should == ["fr", "es", "en", "de", "ca"]
+    
+    #now manipulate                                             
+    GetText.cached = true                                          
+    #p GetText::Merb.send(:class_variable_get, :@@vailable_locales) 
+    #GetText::Merb.send(:class_variable_set, :@@vailable_locales, ["ee"])
+    #p GetText::Merb.send(:class_variable_get, :@@vailable_locales) 
+    GetText::Merb.available_locales.should == ["ee"]
   end
+  
+  it "should normalize the locale string either default"
   
   it "should set and get the textdomain" do
     GettextLocalize.textdomain
