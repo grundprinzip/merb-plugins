@@ -1,0 +1,16 @@
+* added CHANGELOG  * modified TODO
+* added CHANGELOG  * modified TODO
+* added hints for missing specs
+* added some documentation  * added gettext dep to rake file
+* added date time spec
+* removing old tests
+* added gettext_localize spec
+* finished render spec  * added currency spec
+* moving form test to spec part 1
+* fixing tests
+* removes svn overhead
+* removes old svn stuff
+* adds some tests  * basic tests working
+* first working version. fixed cgi handling
+* added default locales.yml  * added default countries.yml  * added default locale folder  * modified gettext_localize to work with merb pathnames
+* initial commit for localize

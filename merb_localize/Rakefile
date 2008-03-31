@@ -5,7 +5,7 @@ require 'spec/rake/spectask'
 
 PLUGIN = "merb_localize"
 NAME = "merb_localize"
-VERSION = "0.1.1"
+VERSION = "0.1.2"
 AUTHOR = "Martin Grund"
 EMAIL = "grundprinzip@gmail.com"
 HOMEPAGE = "http://merb.rubyforge.org/"
