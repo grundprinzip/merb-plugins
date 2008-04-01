@@ -1,4 +1,5 @@
-* added CHANGELOG  * modified TODO
+* incremented version to 0.1.2  * added changes to CHANGELOG
+* incremented version to 0.1.2  * added changes to CHANGELOG
 * added CHANGELOG  * modified TODO
 * added hints for missing specs
 * added some documentation  * added gettext dep to rake file
